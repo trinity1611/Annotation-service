@@ -1,0 +1,633 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "timestamp": "2026-07-04T11:27:15.964006+00:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "6df447d2-e464-4b01-bf13-f38cc96f1d6f",
+        "name": [
+          {
+            "use": "official",
+            "family": "aged",
+            "given": [
+              "aged"
+            ]
+          }
+        ],
+        "gender": "female",
+        "identifier": [
+          {
+            "system": "http://hospital.org/fhir/patient-ids",
+            "value": "100"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc",
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "EMER",
+          "display": "Emergency"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "period": {
+          "start": "2026-07-04T11:27:15.963474+00:00"
+        },
+        "reasonCode": [
+          {
+            "text": "severe cough for one week with greenish sputum, shortness of breath"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7978f78b-2b35-4a08-96ba-8627d956d675",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "7978f78b-2b35-4a08-96ba-8627d956d675",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "UNKNOWN",
+              "system": "http://snomed.info/sct",
+              "display": "Pneumonia with acute asthma exacerbation"
+            }
+          ],
+          "text": "Pneumonia with acute asthma exacerbation"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "recordedDate": "2026-07-04T11:27:15.963576+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:93962b63-a469-4672-88c9-b819cfd0c636",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "93962b63-a469-4672-88c9-b819cfd0c636",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "UNKNOWN",
+              "system": "http://snomed.info/sct",
+              "display": "asthma since childhood"
+            }
+          ],
+          "text": "asthma since childhood"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "recordedDate": "2026-07-04T11:27:15.963610+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c1e9c089-3453-446d-a9ed-9dca7487c28f",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "c1e9c089-3453-446d-a9ed-9dca7487c28f",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "195967001",
+              "system": "http://snomed.info/sct",
+              "display": "Asthma"
+            }
+          ],
+          "text": "Asthma"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "recordedDate": "2026-07-04T11:27:15.963643+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9f8ad4b9-90a2-4d56-9c3e-bd17a0a0ac6d",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "9f8ad4b9-90a2-4d56-9c3e-bd17a0a0ac6d",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "233604007",
+              "system": "http://snomed.info/sct",
+              "display": "Pneumonia"
+            }
+          ],
+          "text": "Pneumonia"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "recordedDate": "2026-07-04T11:27:15.963673+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ee408b53-fcf6-45d5-8e0f-9ee40b34745c",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "ee408b53-fcf6-45d5-8e0f-9ee40b34745c",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "49727002",
+              "system": "http://snomed.info/sct",
+              "display": "Cough"
+            }
+          ],
+          "text": "Cough"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "recordedDate": "2026-07-04T11:27:15.963701+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:562c66aa-2d9e-4d55-80be-750e928ee5ac",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "562c66aa-2d9e-4d55-80be-750e928ee5ac",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "267036007",
+              "system": "http://snomed.info/sct",
+              "display": "Dyspnea"
+            }
+          ],
+          "text": "Dyspnea"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "recordedDate": "2026-07-04T11:27:15.963724+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:211846a1-24a1-434a-887b-fb5af9ecb12f",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "211846a1-24a1-434a-887b-fb5af9ecb12f",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "8310-5",
+              "system": "http://loinc.org",
+              "display": "Body temperature"
+            }
+          ],
+          "text": "Body temperature"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:15.963751+00:00",
+        "valueQuantity": {
+          "value": 99.8,
+          "unit": "°F",
+          "system": "http://unitsofmeasure.org",
+          "code": "[degF]"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e8b3a20e-c7e5-46d0-a0ae-7a41ab2ef033",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "e8b3a20e-c7e5-46d0-a0ae-7a41ab2ef033",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "85354-9",
+              "system": "http://loinc.org",
+              "display": "Blood pressure panel"
+            }
+          ],
+          "text": "Blood pressure panel"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:15.963789+00:00",
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 118.0,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 76.0,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:341ba562-35f6-4a30-9755-589dacca62b3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "341ba562-35f6-4a30-9755-589dacca62b3",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "9279-1",
+              "system": "http://loinc.org",
+              "display": "Respiratory rate"
+            }
+          ],
+          "text": "Respiratory rate"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:15.963827+00:00",
+        "valueQuantity": {
+          "value": 22.0,
+          "unit": "breaths per minute"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ce70bb5d-d0db-41e4-94ac-d8017b851a66",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ce70bb5d-d0db-41e4-94ac-d8017b851a66",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "2708-6",
+              "system": "http://loinc.org",
+              "display": "Oxygen saturation"
+            }
+          ],
+          "text": "Oxygen saturation"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:15.963853+00:00",
+        "valueQuantity": {
+          "value": 94.0,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ad578a6a-bee8-46c5-8f96-f9b2abc3989a",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "ad578a6a-bee8-46c5-8f96-f9b2abc3989a",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "type": "allergy",
+        "category": [
+          "medication"
+        ],
+        "code": {
+          "coding": [
+            {
+              "code": "716186003",
+              "system": "http://snomed.info/sct",
+              "display": "No known allergy"
+            }
+          ],
+          "text": "No known allergy"
+        },
+        "patient": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "recordedDate": "2026-07-04T11:27:15.963882+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "AllergyIntolerance"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:699777cb-96f9-477f-a368-382fa6f554ff",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "699777cb-96f9-477f-a368-382fa6f554ff",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "code": "18631",
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "display": "Azithromycin"
+            }
+          ],
+          "text": "Azithromycin"
+        },
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "authoredOn": "2026-07-04T11:27:15.963934+00:00",
+        "dosageInstruction": [
+          {
+            "text": "500 mg once daily for 5 days, nebulization with Salbutamol, Prednisolone 40 mg daily tapering over 7 days",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 500.0,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ff6afef2-31f6-4172-a1b3-833acc34c8dd",
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "ff6afef2-31f6-4172-a1b3-833acc34c8dd",
+        "status": "active",
+        "intent": "plan",
+        "subject": {
+          "reference": "urn:uuid:6df447d2-e464-4b01-bf13-f38cc96f1d6f"
+        },
+        "encounter": {
+          "reference": "urn:uuid:5bec5bc7-9ad4-4e50-97d1-6257d73e5bbc"
+        },
+        "created": "2026-07-04T11:27:15.963999+00:00",
+        "activity": [
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Start Azithromycin 500 mg once daily for 5 days, nebulization with Salbutamol, Prednisolone 40 mg daily tapering over 7 days"
+            }
+          },
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Refer for pulmonology consult"
+            }
+          },
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Follow-up in 3 days"
+            }
+          },
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Chest X-ray shows bilateral infiltrates"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "CarePlan"
+      }
+    }
+  ]
+}

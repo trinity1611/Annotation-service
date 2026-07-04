@@ -1,0 +1,659 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "timestamp": "2026-07-04T11:27:47.908162+00:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "05b77daa-9e6b-48ad-9da0-db057b2bf372",
+        "name": [
+          {
+            "use": "official",
+            "family": "is",
+            "given": [
+              "is"
+            ]
+          }
+        ],
+        "gender": "male",
+        "identifier": [
+          {
+            "system": "http://hospital.org/fhir/patient-ids",
+            "value": "120"
+          }
+        ],
+        "birthDate": "1981-01-01"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "ab457bd7-e5d6-4762-b9fb-6eaa9d81295c",
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "EMER",
+          "display": "Emergency"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "period": {
+          "start": "2026-07-04T11:27:47.907924+00:00"
+        },
+        "reasonCode": [
+          {
+            "text": "complaints of persistent fever for 3 days, temperature recorded at 101"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2a3b48bf-d612-4b4e-8842-e2217dee780d",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "2a3b48bf-d612-4b4e-8842-e2217dee780d",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "UNKNOWN",
+              "system": "http://snomed.info/sct",
+              "display": "Viral fever with uncontrolled diabetes"
+            }
+          ],
+          "text": "Viral fever with uncontrolled diabetes"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "recordedDate": "2026-07-04T11:27:47.907948+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6689db77-c1cd-4932-971e-bdac10702970",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "6689db77-c1cd-4932-971e-bdac10702970",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "44054006",
+              "system": "http://snomed.info/sct",
+              "display": "Type 2 diabetes mellitus"
+            }
+          ],
+          "text": "Type 2 diabetes mellitus"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "recordedDate": "2026-07-04T11:27:47.907958+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ca0faf6c-7ed1-4097-83e8-af7909530205",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "ca0faf6c-7ed1-4097-83e8-af7909530205",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "44054006",
+              "system": "http://snomed.info/sct",
+              "display": "Type 2 diabetes mellitus"
+            }
+          ],
+          "text": "Type 2 diabetes mellitus"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "recordedDate": "2026-07-04T11:27:47.907968+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3c0f141d-682f-4bb7-a720-edd21d38a611",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "3c0f141d-682f-4bb7-a720-edd21d38a611",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "386661006",
+              "system": "http://snomed.info/sct",
+              "display": "Fever"
+            }
+          ],
+          "text": "Fever"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "recordedDate": "2026-07-04T11:27:47.907978+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:37882e74-f7f0-44f9-b4fc-42470515e575",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "37882e74-f7f0-44f9-b4fc-42470515e575",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "25064002",
+              "system": "http://snomed.info/sct",
+              "display": "Headache"
+            }
+          ],
+          "text": "Headache"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "recordedDate": "2026-07-04T11:27:47.907987+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4f181c6c-e505-4f57-9985-9f006ccf57ff",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "4f181c6c-e505-4f57-9985-9f006ccf57ff",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "code": "271807003",
+              "system": "http://snomed.info/sct",
+              "display": "Skin rash"
+            }
+          ],
+          "text": "Skin rash"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "recordedDate": "2026-07-04T11:27:47.907996+00:00"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f3070b6c-25c3-4ccb-b0c4-edc95bd60d19",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "f3070b6c-25c3-4ccb-b0c4-edc95bd60d19",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "8867-4",
+              "system": "http://loinc.org",
+              "display": "Heart rate"
+            }
+          ],
+          "text": "Heart rate"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:47.908006+00:00",
+        "valueQuantity": {
+          "value": 92.0,
+          "unit": "beats per minute"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3d8f5ced-3194-4635-a837-a0a7dc173879",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "3d8f5ced-3194-4635-a837-a0a7dc173879",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "2708-6",
+              "system": "http://loinc.org",
+              "display": "Oxygen saturation"
+            }
+          ],
+          "text": "Oxygen saturation"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:47.908019+00:00",
+        "valueQuantity": {
+          "value": 97.0,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c02d1808-7978-4bbc-8f53-74e3393c5a27",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "c02d1808-7978-4bbc-8f53-74e3393c5a27",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "718-7",
+              "system": "http://loinc.org",
+              "display": "Hemoglobin [Mass/volume] in blood"
+            }
+          ],
+          "text": "Hemoglobin [Mass/volume] in blood"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:47.908029+00:00",
+        "valueQuantity": {
+          "value": 12.5,
+          "unit": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/dL"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:264ceeb7-9bf4-4273-92b2-06d2b504431f",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "264ceeb7-9bf4-4273-92b2-06d2b504431f",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "code": "1558-6",
+              "system": "http://loinc.org",
+              "display": "Fasting glucose [Mass/volume] in serum/plasma"
+            }
+          ],
+          "text": "Fasting glucose [Mass/volume] in serum/plasma"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "effectiveDateTime": "2026-07-04T11:27:47.908040+00:00",
+        "valueQuantity": {
+          "value": 180.0,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a1f4c5fa-fd90-4a7d-b239-a9867cb51ee1",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "a1f4c5fa-fd90-4a7d-b239-a9867cb51ee1",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "type": "allergy",
+        "category": [
+          "medication"
+        ],
+        "code": {
+          "coding": [
+            {
+              "code": "91936005",
+              "system": "http://snomed.info/sct",
+              "display": "Allergy to penicillin"
+            }
+          ],
+          "text": "Allergy to penicillin"
+        },
+        "patient": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "recordedDate": "2026-07-04T11:27:47.908050+00:00",
+        "reaction": [
+          {
+            "description": "skin rash",
+            "manifestation": [
+              {
+                "text": "skin rash"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "AllergyIntolerance"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:10dd5352-2826-43cc-b1dc-d97966a9ff5e",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "10dd5352-2826-43cc-b1dc-d97966a9ff5e",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "code": "6809",
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "display": "Metformin"
+            }
+          ],
+          "text": "Metformin"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "authoredOn": "2026-07-04T11:27:47.908073+00:00",
+        "dosageInstruction": [
+          {
+            "text": "500 mg twice daily",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 500.0,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:89895928-adc5-44f2-a5ac-4db1f295a2da",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "89895928-adc5-44f2-a5ac-4db1f295a2da",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "code": "161",
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "display": "Acetaminophen"
+            }
+          ],
+          "text": "Acetaminophen"
+        },
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "authoredOn": "2026-07-04T11:27:47.908140+00:00",
+        "dosageInstruction": [
+          {
+            "text": "650 mg three times a day for 5 days",
+            "doseAndRate": [
+              {
+                "doseQuantity": {
+                  "value": 650.0,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a898bb0c-4907-4b59-b5d8-e42b65311384",
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "a898bb0c-4907-4b59-b5d8-e42b65311384",
+        "status": "active",
+        "intent": "plan",
+        "subject": {
+          "reference": "urn:uuid:05b77daa-9e6b-48ad-9da0-db057b2bf372"
+        },
+        "encounter": {
+          "reference": "urn:uuid:ab457bd7-e5d6-4762-b9fb-6eaa9d81295c"
+        },
+        "created": "2026-07-04T11:27:47.908160+00:00",
+        "activity": [
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Prescribe Paracetamol 650 mg three times a day for 5 days"
+            }
+          },
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Continue Metformin"
+            }
+          },
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Advise CBC and thyroid panel"
+            }
+          },
+          {
+            "detail": {
+              "status": "scheduled",
+              "description": "Follow up in one week"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "CarePlan"
+      }
+    }
+  ]
+}
