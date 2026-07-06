@@ -1,9 +1,9 @@
 """
-Audio Transcription Routes
-===========================
-POST /api/audio/transcribe      – upload audio file (.wav, .mp3, etc.), get transcript in
-                                   original language + English translation + NLP extraction
-POST /api/audio/transcribe-text – send raw text (for demo/testing), get NLP extraction
+Audio Transcription & Diarization Routes
+==========================================
+POST /api/audio/transcribe      – upload audio file (.wav, .mp3, etc.), get diarized
+                                   speaker-attributed output + NLP extraction
+POST /api/audio/transcribe-text – send raw text (for testing), get NLP extraction
 """
 
 from fastapi import APIRouter, File, UploadFile, HTTPException, Form
@@ -16,11 +16,23 @@ from backend.app.services.nlp_engine import extract_clinical_entities
 router = APIRouter(prefix="/api/audio", tags=["Audio"])
 
 
+class UtteranceItem(BaseModel):
+    """A single speaker-diarized utterance in GT format."""
+    utterance_id: str
+    speaker_id: str
+    speaker_role: str
+    start_time: float
+    end_time: float
+    original_text: str
+    translated_text: str
+
+
 class TranscriptionResponse(BaseModel):
-    transcript: str
-    original_transcript: str
+    transcript: str                         # Flat English text (for NLP)
+    original_transcript: str                # Flat source-language text
     language: str
-    extracted: dict
+    extracted: dict                         # NLP-extracted clinical entities
+    diarized_output: list[UtteranceItem]    # GT-format speaker-diarized utterances
 
 
 class TextInputRequest(BaseModel):
@@ -34,11 +46,12 @@ async def transcribe(
 ):
     """
     Accept a raw audio file (wav, mp3, m4a, webm, etc.) and return:
-    1. The English transcript (translated from Hindi/Hinglish if needed)
-    2. The original-language transcript
-    3. The detected language code
+    1. Speaker-diarized utterances with timestamps & English translation
+    2. Flat English transcript (for NLP entity extraction)
+    3. Flat original-language transcript
     4. Pre-extracted clinical entities mapped to the 7 form sections
 
+    All processing runs on local GPU (faster-whisper + pyannote.audio).
     Supported audio formats: .wav, .mp3, .m4a, .webm, .ogg, .flac, .aac
     Supported languages: English (en), Hindi (hi), Hinglish
     """
@@ -59,7 +72,7 @@ async def transcribe(
     if len(audio_bytes) == 0:
         raise HTTPException(status_code=400, detail="Empty audio file")
 
-    # Transcribe with language hint
+    # Transcribe + diarize with local GPU pipeline
     result = transcribe_audio(audio_bytes, file.filename, language_hint=language or "")
 
     # Extract clinical entities from the English transcript
@@ -70,13 +83,16 @@ async def transcribe(
         original_transcript=result["original_transcript"],
         language=result["language"],
         extracted=extracted,
+        diarized_output=[
+            UtteranceItem(**u) for u in result.get("diarized_output", [])
+        ],
     )
 
 
 @router.post("/transcribe-text", response_model=TranscriptionResponse)
 async def transcribe_text(body: TextInputRequest):
     """
-    Accept raw clinical text (for demo / testing without audio).
+    Accept raw clinical text (for testing without audio).
     Returns the same pre-extracted clinical entities.
     """
     if not body.text.strip():
@@ -88,4 +104,5 @@ async def transcribe_text(body: TextInputRequest):
         original_transcript=body.text,
         language="en",
         extracted=extracted,
+        diarized_output=[],
     )

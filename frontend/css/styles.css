@@ -892,3 +892,352 @@ body {
     border: 1.5px dashed var(--border-color);
     border-radius: var(--radius-sm);
 }
+
+/* ===================================================================
+   CUSTOM AUDIO PLAYER
+   =================================================================== */
+
+.custom-audio-player {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.04));
+    border: 1px solid rgba(99,102,241,0.18);
+    border-radius: var(--radius-md);
+    margin-top: 14px;
+}
+
+.player-main-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(99,102,241,0.15);
+    transition: var(--transition-fast);
+    flex-shrink: 0;
+}
+.player-btn:hover {
+    background: rgba(99,102,241,0.3);
+    transform: scale(1.08);
+}
+.player-btn.playing {
+    background: var(--accent-indigo);
+    box-shadow: 0 0 16px rgba(99,102,241,0.4);
+}
+
+.player-slider-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.1);
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.player-slider:hover { height: 7px; }
+
+.player-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-indigo);
+    border: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(99,102,241,0.5);
+    transition: var(--transition-fast);
+}
+.player-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 14px rgba(99,102,241,0.7);
+}
+
+.player-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-indigo);
+    border: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(99,102,241,0.5);
+}
+
+.player-time {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    min-width: 95px;
+    text-align: center;
+}
+
+.player-volume-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.volume-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    transition: var(--transition-fast);
+}
+.volume-btn:hover { color: var(--text-primary); }
+
+.volume-slider {
+    width: 80px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.12);
+    outline: none;
+    cursor: pointer;
+}
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    cursor: pointer;
+}
+
+/* ===================================================================
+   DIARIZATION TIMELINE
+   =================================================================== */
+
+.diarization-card .card-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.diarization-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lang-toggle-btn {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(99,102,241,0.25);
+    background: rgba(99,102,241,0.08);
+    color: var(--text-accent);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+.lang-toggle-btn:hover {
+    background: rgba(99,102,241,0.2);
+}
+
+.diarization-timeline {
+    max-height: 420px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    padding-right: 4px;
+    scroll-behavior: smooth;
+}
+
+.utterance-row {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.02);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition-base);
+    align-items: flex-start;
+    position: relative;
+}
+.utterance-row:hover {
+    background: rgba(99,102,241,0.06);
+    border-color: rgba(99,102,241,0.15);
+    transform: translateX(2px);
+}
+
+.utterance-row.active {
+    background: rgba(99,102,241,0.1);
+    border-color: rgba(99,102,241,0.35);
+    box-shadow: 0 0 20px rgba(99,102,241,0.1), inset 0 0 0 1px rgba(99,102,241,0.15);
+}
+
+.utterance-speaker-bar {
+    width: 3px;
+    min-height: 100%;
+    border-radius: 2px;
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+.utterance-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.utterance-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.speaker-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* Speaker color scheme */
+.speaker-color-0 { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+.speaker-color-0 .utterance-speaker-bar, .speaker-bar-0 { background: var(--accent-indigo); }
+.speaker-badge.speaker-color-0 { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+
+.speaker-color-1 { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+.speaker-color-1 .utterance-speaker-bar, .speaker-bar-1 { background: var(--accent-emerald); }
+.speaker-badge.speaker-color-1 { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+
+.speaker-color-2 { background: rgba(245,158,11,0.2); color: #fcd34d; }
+.speaker-color-2 .utterance-speaker-bar, .speaker-bar-2 { background: var(--accent-amber); }
+.speaker-badge.speaker-color-2 { background: rgba(245,158,11,0.2); color: #fcd34d; }
+
+.speaker-color-3 { background: rgba(244,63,94,0.2); color: #fda4af; }
+.speaker-color-3 .utterance-speaker-bar, .speaker-bar-3 { background: var(--accent-rose); }
+.speaker-badge.speaker-color-3 { background: rgba(244,63,94,0.2); color: #fda4af; }
+
+.speaker-color-4 { background: rgba(6,182,212,0.2); color: #67e8f9; }
+.speaker-color-4 .utterance-speaker-bar, .speaker-bar-4 { background: var(--accent-cyan); }
+.speaker-badge.speaker-color-4 { background: rgba(6,182,212,0.2); color: #67e8f9; }
+
+.timestamp-badge {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.utterance-text-primary {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.utterance-text-secondary {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.utterance-seek-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: var(--transition-fast);
+    color: var(--text-accent);
+    font-size: 0.7rem;
+}
+.utterance-row:hover .utterance-seek-icon {
+    opacity: 0.7;
+}
+
+.diarization-empty {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+.diarization-empty svg {
+    opacity: 0.3;
+    margin-bottom: 10px;
+}
+
+.diarization-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.diarization-stat {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+}
+.diarization-stat strong {
+    color: var(--text-primary);
+    margin-right: 4px;
+}
+
+/* Processing indicator */
+.processing-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    gap: 16px;
+}
+
+.processing-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(255,255,255,0.08);
+    border-top-color: var(--accent-indigo);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.processing-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+.processing-subtext {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}

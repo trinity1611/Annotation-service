@@ -14,8 +14,14 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     debug: bool = True
 
-    # Sarvam AI API key for Speech-to-Text
-    sarvam_api_key: str = Field(default="", alias="SARVAM_API_KEY")
+    # Hugging Face token for gated models (pyannote diarization)
+    hf_token: str = Field(default="", alias="HF_TOKEN")
+
+    # Whisper model size for faster-whisper (tiny, base, small, medium, large-v3)
+    whisper_model: str = Field(default="large-v3", alias="WHISPER_MODEL")
+
+    # Device for GPU inference (cuda or cpu)
+    device: str = Field(default="cuda", alias="DEVICE")
 
     # Public RxNorm REST API base URL (no key needed)
     rxnorm_api_base: str = "https://rxnav.nlm.nih.gov/REST"

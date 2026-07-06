@@ -1,7 +1,8 @@
 /* ===================================================================
    FHIR Clinical Workspace – Application Logic
-   Handles audio recording, transcription, NLP extraction,
-   terminology autocomplete, form management, and FHIR bundle generation.
+   Handles audio recording, custom player, speaker diarization display,
+   transcription, NLP extraction, terminology autocomplete, form
+   management, and FHIR bundle generation.
    =================================================================== */
 
 (() => {
@@ -40,6 +41,24 @@
     const infoMedications = $('#info-medications');
     const infoAllergies = $('#info-allergies');
 
+    // Custom player elements
+    const audioPlayback = $('#audio-playback');
+    const playbackContainer = $('#audio-playback-container');
+    const playerPlayBtn = $('#player-play-btn');
+    const playIcon = $('#play-icon');
+    const pauseIcon = $('#pause-icon');
+    const playerSlider = $('#player-slider');
+    const playerTime = $('#player-time');
+    const volumeBtn = $('#volume-btn');
+    const volumeSlider = $('#volume-slider');
+
+    // Diarization elements
+    const diarizationTimeline = $('#diarization-timeline');
+    const diarizationEmpty = $('#diarization-empty');
+    const diarizationStats = $('#diarization-stats');
+    const btnLangToggle = $('#btn-lang-toggle');
+    const btnDownloadGT = $('#btn-download-gt');
+
     // ── State ─────────────────────────────────────────────────────────
     let mediaRecorder = null;
     let audioChunks = [];
@@ -48,6 +67,9 @@
     let timerSeconds = 0;
     let currentBundle = null;
     let autocompleteTimeout = null;
+    let currentUtterances = [];
+    let showEnglishFirst = true;
+    let isSeeking = false;
 
     // ── Utilities ─────────────────────────────────────────────────────
     function setStatus(text, type = 'ready') {
@@ -72,6 +94,13 @@
         const m = String(Math.floor(seconds / 60)).padStart(2, '0');
         const s = String(seconds % 60).padStart(2, '0');
         return `${m}:${s}`;
+    }
+
+    function formatTimestamp(seconds) {
+        const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const s = String(Math.floor(seconds % 60)).padStart(2, '0');
+        const ms = String(Math.floor((seconds % 1) * 100)).padStart(2, '0');
+        return `${m}:${s}.${ms}`;
     }
 
     function updateInfoCounters() {
@@ -100,7 +129,251 @@
         );
     }
 
-    // ── Audio Recording ───────────────────────────────────────────────
+    // ===================================================================
+    //  CUSTOM AUDIO PLAYER
+    // ===================================================================
+
+    function initCustomPlayer(blob) {
+        audioPlayback.src = URL.createObjectURL(blob);
+        playbackContainer.style.display = 'block';
+
+        // Reset state
+        playerSlider.value = 0;
+        playerTime.textContent = '00:00 / 00:00';
+        playIcon.style.display = '';
+        pauseIcon.style.display = 'none';
+        playerPlayBtn.classList.remove('playing');
+    }
+
+    // Play/Pause
+    playerPlayBtn.addEventListener('click', () => {
+        if (audioPlayback.paused) {
+            audioPlayback.play();
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = '';
+            playerPlayBtn.classList.add('playing');
+        } else {
+            audioPlayback.pause();
+            playIcon.style.display = '';
+            pauseIcon.style.display = 'none';
+            playerPlayBtn.classList.remove('playing');
+        }
+    });
+
+    // Time update → slider + time display + active utterance
+    audioPlayback.addEventListener('timeupdate', () => {
+        if (isSeeking) return;
+        const dur = audioPlayback.duration || 0;
+        const cur = audioPlayback.currentTime || 0;
+        if (dur > 0) {
+            playerSlider.value = (cur / dur) * 100;
+            // Update slider gradient for progress
+            const pct = (cur / dur) * 100;
+            playerSlider.style.background = `linear-gradient(to right, var(--accent-indigo) 0%, var(--accent-violet) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+        }
+        playerTime.textContent = `${formatTime(Math.floor(cur))} / ${formatTime(Math.floor(dur))}`;
+        updateActiveUtterance(cur);
+    });
+
+    // Slider seek
+    playerSlider.addEventListener('input', () => {
+        isSeeking = true;
+        const dur = audioPlayback.duration || 0;
+        const seekTime = (playerSlider.value / 100) * dur;
+        audioPlayback.currentTime = seekTime;
+        const pct = playerSlider.value;
+        playerSlider.style.background = `linear-gradient(to right, var(--accent-indigo) 0%, var(--accent-violet) ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+    });
+
+    playerSlider.addEventListener('change', () => {
+        isSeeking = false;
+    });
+
+    // Audio ended
+    audioPlayback.addEventListener('ended', () => {
+        playIcon.style.display = '';
+        pauseIcon.style.display = 'none';
+        playerPlayBtn.classList.remove('playing');
+    });
+
+    // Loaded metadata
+    audioPlayback.addEventListener('loadedmetadata', () => {
+        playerTime.textContent = `00:00 / ${formatTime(Math.floor(audioPlayback.duration))}`;
+    });
+
+    // Volume
+    volumeSlider.addEventListener('input', () => {
+        audioPlayback.volume = parseFloat(volumeSlider.value);
+    });
+
+    volumeBtn.addEventListener('click', () => {
+        if (audioPlayback.muted) {
+            audioPlayback.muted = false;
+            volumeSlider.value = audioPlayback.volume || 1;
+        } else {
+            audioPlayback.muted = true;
+            volumeSlider.value = 0;
+        }
+    });
+
+    // ===================================================================
+    //  DIARIZATION TIMELINE
+    // ===================================================================
+
+    function renderDiarizedOutput(utterances) {
+        currentUtterances = utterances || [];
+
+        if (!currentUtterances.length) {
+            diarizationTimeline.innerHTML = '';
+            diarizationTimeline.appendChild(diarizationEmpty);
+            diarizationEmpty.style.display = '';
+            diarizationStats.style.display = 'none';
+            return;
+        }
+
+        // Hide empty state
+        diarizationEmpty.style.display = 'none';
+
+        // Build unique speaker list for consistent color assignment
+        const speakerIds = [];
+        currentUtterances.forEach(u => {
+            if (!speakerIds.includes(u.speaker_id)) speakerIds.push(u.speaker_id);
+        });
+
+        // Clear timeline
+        diarizationTimeline.innerHTML = '';
+
+        // Render each utterance row
+        currentUtterances.forEach((u, idx) => {
+            const speakerColorIdx = speakerIds.indexOf(u.speaker_id) % 5;
+            const row = document.createElement('div');
+            row.className = 'utterance-row';
+            row.dataset.index = idx;
+            row.dataset.start = u.start_time;
+            row.dataset.end = u.end_time;
+
+            const primaryText = showEnglishFirst ? u.translated_text : u.original_text;
+            const secondaryText = showEnglishFirst ? u.original_text : u.translated_text;
+
+            row.innerHTML = `
+                <div class="utterance-speaker-bar speaker-bar-${speakerColorIdx}"></div>
+                <div class="utterance-content">
+                    <div class="utterance-header">
+                        <span class="speaker-badge speaker-color-${speakerColorIdx}">${escapeHtml(u.speaker_role)}</span>
+                        <span class="timestamp-badge">${formatTimestamp(u.start_time)} → ${formatTimestamp(u.end_time)}</span>
+                    </div>
+                    <div class="utterance-text-primary">${escapeHtml(primaryText || '—')}</div>
+                    ${secondaryText ? `<div class="utterance-text-secondary">${escapeHtml(secondaryText)}</div>` : ''}
+                </div>
+                <span class="utterance-seek-icon">▶</span>
+            `;
+
+            // Click to seek
+            row.addEventListener('click', () => {
+                seekToTime(u.start_time);
+            });
+
+            diarizationTimeline.appendChild(row);
+        });
+
+        // Show stats
+        const totalDuration = currentUtterances.length > 0
+            ? currentUtterances[currentUtterances.length - 1].end_time
+            : 0;
+
+        diarizationStats.innerHTML = `
+            <span class="diarization-stat"><strong>${currentUtterances.length}</strong>utterances</span>
+            <span class="diarization-stat"><strong>${speakerIds.length}</strong>speakers</span>
+            <span class="diarization-stat"><strong>${formatTime(Math.floor(totalDuration))}</strong>duration</span>
+        `;
+        diarizationStats.style.display = 'flex';
+    }
+
+    function seekToTime(startTime) {
+        if (audioPlayback.src) {
+            audioPlayback.currentTime = startTime;
+            if (audioPlayback.paused) {
+                audioPlayback.play();
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = '';
+                playerPlayBtn.classList.add('playing');
+            }
+        }
+    }
+
+    function updateActiveUtterance(currentTime) {
+        const rows = diarizationTimeline.querySelectorAll('.utterance-row');
+        let activeRow = null;
+
+        rows.forEach(row => {
+            const start = parseFloat(row.dataset.start);
+            const end = parseFloat(row.dataset.end);
+            if (currentTime >= start && currentTime <= end) {
+                row.classList.add('active');
+                activeRow = row;
+            } else {
+                row.classList.remove('active');
+            }
+        });
+
+        // Auto-scroll to active row
+        if (activeRow) {
+            const container = diarizationTimeline;
+            const rowTop = activeRow.offsetTop - container.offsetTop;
+            const rowBottom = rowTop + activeRow.offsetHeight;
+            const scrollTop = container.scrollTop;
+            const containerHeight = container.clientHeight;
+
+            if (rowTop < scrollTop || rowBottom > scrollTop + containerHeight) {
+                container.scrollTo({
+                    top: rowTop - containerHeight / 3,
+                    behavior: 'smooth',
+                });
+            }
+        }
+    }
+
+    // Language toggle
+    btnLangToggle.addEventListener('click', () => {
+        showEnglishFirst = !showEnglishFirst;
+        btnLangToggle.textContent = showEnglishFirst ? 'English ↔ Original' : 'Original ↔ English';
+        renderDiarizedOutput(currentUtterances);
+    });
+
+    // Download GT Format
+    if (btnDownloadGT) {
+        btnDownloadGT.addEventListener('click', () => {
+            if (!currentUtterances || currentUtterances.length === 0) {
+                showToast('No diarization output to download.', 'error');
+                return;
+            }
+            
+            let tsvContent = '';
+            currentUtterances.forEach(u => {
+                const fileId = u.utterance_id.split('_')[0] || 'audio';
+                const start = Number(u.start_time).toFixed(3);
+                const end = Number(u.end_time).toFixed(3);
+                // GT typically uses original language text
+                const text = u.original_text || u.translated_text || '';
+                tsvContent += `${fileId}\t${u.utterance_id}\t${u.speaker_id}\t${u.speaker_role}\t${start}\t${end}\t${text}\n`;
+            });
+            
+            const blob = new Blob([tsvContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const fileId = currentUtterances[0].utterance_id.split('_')[0] || 'audio';
+            a.download = `${fileId}_GT.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('GT output downloaded!', 'success');
+        });
+    }
+
+    // ===================================================================
+    //  AUDIO RECORDING
+    // ===================================================================
+
     async function startRecording() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -155,7 +428,10 @@
         else startRecording();
     });
 
-    // ── Audio Upload ──────────────────────────────────────────────────
+    // ===================================================================
+    //  AUDIO UPLOAD & TRANSCRIPTION
+    // ===================================================================
+
     audioUpload.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -166,13 +442,18 @@
 
     async function uploadAudio(blob, filename) {
         try {
-            // Update audio player preview
-            const audioPlayback = document.getElementById('audio-playback');
-            const playbackContainer = document.getElementById('audio-playback-container');
-            if (audioPlayback && playbackContainer) {
-                audioPlayback.src = URL.createObjectURL(blob);
-                playbackContainer.style.display = 'block';
-            }
+            // Init custom player
+            initCustomPlayer(blob);
+
+            // Show processing state in diarization timeline
+            diarizationTimeline.innerHTML = `
+                <div class="processing-overlay">
+                    <div class="processing-spinner"></div>
+                    <div class="processing-text">Processing audio on GPU…</div>
+                    <div class="processing-subtext">Running Whisper transcription + pyannote diarization</div>
+                </div>
+            `;
+            diarizationStats.style.display = 'none';
 
             const formData = new FormData();
             formData.append('file', blob, filename);
@@ -182,6 +463,8 @@
             if (langSelect && langSelect.value) {
                 formData.append('language', langSelect.value);
             }
+
+            setStatus('Processing audio on GPU…', 'busy');
 
             const resp = await fetch(`${API}/api/audio/transcribe`, {
                 method: 'POST',
@@ -199,18 +482,15 @@
 
             const data = await resp.json();
 
-            // Show English transcript in the main area
-            transcriptArea.value = data.transcript;
-
-            // Show original transcript (Hindi/other) if different
-            const origArea = document.getElementById('original-transcript-area');
-            const origCard = document.getElementById('original-transcript-card');
-            if (data.language && data.language !== 'en' && data.original_transcript !== data.transcript) {
-                if (origArea) origArea.value = data.original_transcript;
-                if (origCard) origCard.style.display = 'block';
+            // Render diarized output
+            if (data.diarized_output && data.diarized_output.length > 0) {
+                renderDiarizedOutput(data.diarized_output);
             } else {
-                if (origCard) origCard.style.display = 'none';
+                renderDiarizedOutput([]);
             }
+
+            // Show English transcript in the text area (for NLP / manual editing)
+            transcriptArea.value = data.transcript;
 
             // Update language badge
             const langBadge = document.getElementById('detected-language');
@@ -222,11 +502,13 @@
 
             populateForm(data.extracted);
             setStatus('Ready');
-            showToast('Transcription complete! Entities extracted.', 'success');
+            showToast('Diarization complete! Speaker segments extracted.', 'success');
         } catch (err) {
             console.error('Transcription failed:', err);
             setStatus('Error', 'error');
-            showToast('Transcription failed: ' + err.message, 'error');
+            showToast('Processing failed: ' + err.message, 'error');
+            // Reset diarization area
+            renderDiarizedOutput([]);
         }
     }
 
@@ -266,7 +548,10 @@
         draw();
     }
 
-    // ── Extract Entities (Text) ───────────────────────────────────────
+    // ===================================================================
+    //  EXTRACT ENTITIES (Text)
+    // ===================================================================
+
     btnExtract.addEventListener('click', async () => {
         const text = transcriptArea.value.trim();
         if (!text) {
@@ -312,6 +597,12 @@
 
             const data = await resp.json();
             transcriptArea.value = data.transcript;
+
+            // Render diarization if available
+            if (data.diarized_output && data.diarized_output.length > 0) {
+                renderDiarizedOutput(data.diarized_output);
+            }
+
             populateForm(data.extracted);
             setStatus('Ready');
             showToast('Demo note loaded!', 'info');
@@ -322,7 +613,10 @@
         }
     });
 
-    // ── Populate Form from Extracted Data ─────────────────────────────
+    // ===================================================================
+    //  POPULATE FORM FROM EXTRACTED DATA
+    // ===================================================================
+
     function populateForm(extracted) {
         // Demographics
         const d = extracted.demographics || {};
@@ -364,7 +658,9 @@
         updateInfoCounters();
     }
 
-    // ── Repeater Row Builders ─────────────────────────────────────────
+    // ===================================================================
+    //  REPEATER ROW BUILDERS
+    // ===================================================================
 
     function createRemoveBtn(row) {
         const btn = document.createElement('button');
@@ -699,7 +995,10 @@
         setTimeout(() => encDropdown.classList.remove('visible'), 200);
     });
 
-    // ── Collect Form Data ─────────────────────────────────────────────
+    // ===================================================================
+    //  COLLECT FORM DATA
+    // ===================================================================
+
     function collectFormData() {
         // Demographics
         const demographics = {
@@ -794,7 +1093,10 @@
         return { demographics, encounter, conditions, observations, allergies, medications, carePlan };
     }
 
-    // ── Generate FHIR Bundle ──────────────────────────────────────────
+    // ===================================================================
+    //  GENERATE FHIR BUNDLE
+    // ===================================================================
+
     btnGenerateBundle.addEventListener('click', async () => {
         const formData = collectFormData();
 
@@ -857,7 +1159,10 @@
         }
     });
 
-    // ── Modal Controls ────────────────────────────────────────────────
+    // ===================================================================
+    //  MODAL CONTROLS
+    // ===================================================================
+
     btnCloseModal.addEventListener('click', () => { modalOverlay.style.display = 'none'; });
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) modalOverlay.style.display = 'none';
@@ -882,7 +1187,10 @@
         showToast('JSON file downloaded!', 'success');
     });
 
-    // ── Clear Form ────────────────────────────────────────────────────
+    // ===================================================================
+    //  CLEAR FORM
+    // ===================================================================
+
     btnClearForm.addEventListener('click', () => {
         $('#patient-id').value = '';
         $('#patient-name').value = '';
@@ -897,6 +1205,13 @@
             $(`#repeater-${id}`).innerHTML = '';
         });
 
+        // Reset diarization
+        renderDiarizedOutput([]);
+
+        // Reset player
+        playbackContainer.style.display = 'none';
+        audioPlayback.src = '';
+
         updateInfoCounters();
         showToast('Form cleared.', 'info');
     });
@@ -910,6 +1225,6 @@
 
     // ── Initial state ─────────────────────────────────────────────────
     updateInfoCounters();
-    console.log('FHIRBridge Clinical Workspace initialized.');
+    console.log('FHIRBridge Clinical Workspace initialized (GPU diarization mode).');
 
 })();

@@ -9,10 +9,17 @@ dependencies:
       - fastapi==0.111.0
       - uvicorn==0.30.1
       - python-multipart==0.0.9
-      - requests==2.32.3
       - pydantic==2.7.4
       - pydantic-settings>=2.0
       - aiofiles==23.2.1
       - pytest==8.2.2
       - httpx==0.27.0
       - sqlalchemy
+      # GPU ML pipeline
+      - faster-whisper>=1.1.0
+      - pyannote.audio>=3.3.0
+      - soundfile>=0.12.0
+      - numpy>=1.24.0
+      - scipy>=1.10.0
+      # Note: Install torch+torchaudio separately with CUDA:
+      # pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
