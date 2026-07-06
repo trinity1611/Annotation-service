@@ -166,6 +166,14 @@
 
     async function uploadAudio(blob, filename) {
         try {
+            // Update audio player preview
+            const audioPlayback = document.getElementById('audio-playback');
+            const playbackContainer = document.getElementById('audio-playback-container');
+            if (audioPlayback && playbackContainer) {
+                audioPlayback.src = URL.createObjectURL(blob);
+                playbackContainer.style.display = 'block';
+            }
+
             const formData = new FormData();
             formData.append('file', blob, filename);
 
@@ -180,7 +188,14 @@
                 body: formData,
             });
 
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            if (!resp.ok) {
+                let errorMsg = `HTTP ${resp.status}`;
+                try {
+                    const errData = await resp.json();
+                    errorMsg = errData.detail || errorMsg;
+                } catch(e) {}
+                throw new Error(errorMsg);
+            }
 
             const data = await resp.json();
 

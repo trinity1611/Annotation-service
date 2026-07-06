@@ -145,6 +145,48 @@ def _get_demo_transcript_hindi() -> dict[str, Any]:
 # Sarvam AI API transcription
 # ---------------------------------------------------------------------------
 
+def _preprocess_audio(audio_bytes: bytes, filename: str) -> tuple[list[bytes], str]:
+    """
+    Attempt to preprocess the audio to 16kHz, 16-bit Mono PCM WAV format.
+    Splits the audio into 25-second chunks to respect the Sarvam 30s limit.
+    """
+    try:
+        import soundfile as sf
+        import numpy as np
+        import scipy.signal
+        import io
+        
+        # Read the audio bytes
+        data, samplerate = sf.read(io.BytesIO(audio_bytes))
+        
+        # Convert to mono if stereo
+        if len(data.shape) > 1 and data.shape[1] > 1:
+            data = np.mean(data, axis=1)
+            
+        # Resample to 16000Hz if needed
+        target_sr = 16000
+        if samplerate != target_sr:
+            num_samples = int(round(len(data) * float(target_sr) / samplerate))
+            data = scipy.signal.resample(data, num_samples)
+            
+        # Chunk into 25-second segments
+        chunk_size = 25 * target_sr
+        chunks = []
+        for i in range(0, len(data), chunk_size):
+            chunk_data = data[i:i+chunk_size]
+            out_buf = io.BytesIO()
+            sf.write(out_buf, chunk_data, target_sr, format='WAV', subtype='PCM_16')
+            out_buf.seek(0)
+            chunks.append(out_buf.read())
+            
+        new_filename = filename.rsplit('.', 1)[0] + '.wav' if '.' in filename else filename + '.wav'
+        return chunks, new_filename
+    except Exception as exc:
+        logger.error("Audio preprocessing failed: %s", exc)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Audio preprocessing failed: {exc}")
+
+
 def _transcribe_with_sarvam(audio_bytes: bytes, filename: str, language_hint: str) -> dict[str, Any]:
     """
     Call the Sarvam AI Speech-to-Text API.
@@ -234,12 +276,38 @@ def transcribe_audio(
     if settings.sarvam_api_key:
         logger.info("Transcribing via Sarvam AI API (%d bytes, file=%s)", len(audio_bytes), filename)
         try:
-            return _transcribe_with_sarvam(audio_bytes, filename, language_hint)
+            audio_chunks, processed_filename = _preprocess_audio(audio_bytes, filename)
+            
+            full_transcript = ""
+            full_original = ""
+            detected_language = "en"
+            
+            for chunk_bytes in audio_chunks:
+                res = _transcribe_with_sarvam(chunk_bytes, processed_filename, language_hint)
+                
+                t_text = res.get("transcript", "").strip()
+                o_text = res.get("original_transcript", "").strip()
+                
+                if t_text:
+                    full_transcript += (" " + t_text) if full_transcript else t_text
+                if o_text:
+                    full_original += (" " + o_text) if full_original else o_text
+                    
+                detected_language = res.get("language", detected_language)
+            
+            return {
+                "transcript": full_transcript,
+                "original_transcript": full_original,
+                "language": detected_language
+            }
         except Exception as exc:
-            logger.error("Sarvam transcription failed: %s – falling back to demo", exc)
-            if language_hint == "hi":
-                return _get_demo_transcript_hindi()
-            return _get_demo_transcript()
+            import requests
+            error_details = str(exc)
+            if isinstance(exc, requests.exceptions.HTTPError) and exc.response is not None:
+                error_details = f"{exc.response.status_code} - {exc.response.text}"
+            logger.error("Sarvam transcription failed: %s", error_details)
+            from fastapi import HTTPException
+            raise HTTPException(status_code=500, detail=f"Sarvam API error: {error_details}")
 
     else:
         logger.info("No API keys configured – returning demo transcript")
