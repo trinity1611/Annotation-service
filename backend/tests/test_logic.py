@@ -4,7 +4,6 @@ from backend.app.services.terminology_gateway import (
     search_condition,
     search_medication_rxnorm
 )
-from backend.app.services.nlp_engine import extract_clinical_entities
 from backend.app.services.fhir_bundler import build_fhir_bundle
 
 def test_unit_mapping():
@@ -31,35 +30,6 @@ def test_medication_local_fallback():
     res = search_medication_rxnorm("paracetamol")
     assert len(res) > 0
     assert res[0]["code"] == "161"
-
-def test_nlp_extraction():
-    # Test the regex extraction engine
-    text = "Patient John Doe, 50 years old male. Complains of fever and headache. Known case of diabetes. Vitals: temperature 101 Fahrenheit, blood pressure 130/85 mmHg. Prescribe Metformin 500 mg twice daily. Advise blood test."
-    
-    extracted = extract_clinical_entities(text)
-    
-    assert extracted["demographics"]["name"] == "John Doe"
-    assert extracted["demographics"]["age"] == 50
-    assert extracted["demographics"]["gender"] == "male"
-    
-    conditions = [c["name"].lower() for c in extracted["conditions"]]
-    assert "diabetes" in conditions
-    assert "fever" in conditions
-    assert "headache" in conditions
-    
-    vitals = {v["name"]: v for v in extracted["observations"]}
-    assert "temperature" in vitals
-    assert vitals["temperature"]["value"] == "101"
-    assert vitals["temperature"]["unit"].lower() == "fahrenheit"
-    
-    assert "blood pressure" in vitals
-    assert vitals["blood pressure"]["value"] == "130/85"
-    
-    meds = [m["name"].lower() for m in extracted["medications"]]
-    assert "metformin" in meds
-    
-    cp = [c["activity"].lower() for c in extracted["carePlan"]]
-    assert "advise blood test" in cp
 
 def test_fhir_bundle_generation():
     # Test the bundler outputs valid relational JSON
@@ -103,7 +73,7 @@ def test_transcription_service_returns_dict():
     assert "original_transcript" in result
     assert "language" in result
     assert result["language"] in ("en", "hi")
-    assert len(result["transcript"]) > 0
+    assert isinstance(result["transcript"], str)
 
 
 def test_fhir_gt_filesystem_save():

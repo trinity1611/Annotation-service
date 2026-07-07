@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css?v=3">
 </head>
 <body>
     <!-- ============================================================ -->
@@ -42,104 +42,92 @@
                 <p class="panel-subtitle">Record, upload, or type clinical notes</p>
             </div>
 
-            <!-- Audio Recorder -->
+            <!-- Audio Recorder / File Upload -->
             <div class="card glass-card" id="audio-card">
-                <div class="card-label"><span class="label-dot"></span>Audio Capture</div>
-                <div class="language-select-row" style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <label for="language-select" style="font-size: 0.82rem; color: var(--text-secondary, #94a3b8); font-weight: 500;">Audio Language:</label>
-                    <select id="language-select" style="padding: 5px 10px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary, #e2e8f0); font-size: 0.82rem; cursor: pointer;">
-                        <option value="">Auto-detect</option>
-                        <option value="en">English</option>
-                        <option value="hi">Hindi / हिन्दी</option>
-                    </select>
-                    <span id="detected-language" style="display: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; background: rgba(99,102,241,0.15); color: #818cf8; font-weight: 500;"></span>
-                </div>
-                <div class="audio-controls">
-                    <button class="btn btn-record" id="btn-record" title="Record audio">
-                        <svg class="mic-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                            <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
-                        </svg>
-                        <span class="record-label">Record</span>
-                    </button>
-                    <div class="audio-visualizer" id="audio-visualizer">
-                        <canvas id="visualizer-canvas" width="200" height="40"></canvas>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div class="card-label" style="margin:0;"><span class="label-dot"></span>Audio Capture</div>
+                    <div class="language-select-row" style="display: flex; align-items: center; gap: 10px;">
+                        <label for="language-select" style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 500;">Language:</label>
+                        <select id="language-select" style="padding: 5px 10px; border-radius: 8px; background: rgba(0,0,0,0.03); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.82rem; cursor: pointer;">
+                            <option value="">Auto-detect</option>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi / हिन्दी</option>
+                        </select>
+                        <span id="detected-language" style="display: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; background: rgba(17,123,122,0.1); color: var(--text-accent); font-weight: 500;"></span>
                     </div>
-                    <label class="btn btn-upload" title="Upload .wav, .mp3, .m4a audio file">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                </div>
+
+                <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Upload an audio file or record directly to generate transcripts in English and Hindi.
+                </div>
+                
+                <div class="upload-zone" style="border: 2px dashed var(--accent-indigo); border-radius: var(--radius-sm); padding: 1rem; display: flex; align-items: center; justify-content: space-between; background: rgba(17,123,122,0.03);">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-indigo)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                             <polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/>
                         </svg>
-                        Upload
+                        <span id="upload-text" style="color: var(--text-secondary); font-size: 0.9rem;">Choose audio file to process...</span>
                         <input type="file" id="audio-upload" accept=".wav,.mp3,.m4a,.webm,.ogg,.flac,.aac,audio/*" hidden>
-                    </label>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-record" id="btn-record" title="Record audio" style="background: white; color: var(--accent-indigo); border: 1px solid var(--accent-indigo);">
+                            <svg class="mic-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                                <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+                            </svg>
+                            <span class="record-label">Record</span>
+                        </button>
+                        <label for="audio-upload" class="btn btn-primary" style="cursor: pointer; margin: 0; display: inline-flex; align-items: center;">Upload File</label>
+                    </div>
                 </div>
-                <div class="recording-timer" id="recording-timer" style="display:none;">
+
+                <div class="recording-timer" id="recording-timer" style="display:none; margin-top: 10px;">
                     <span class="timer-pulse"></span> <span id="timer-text">00:00</span>
                 </div>
-                <div style="margin-top: 6px; font-size: 0.75rem; color: var(--text-secondary, #64748b); opacity: 0.7;">Supports: .wav, .mp3, .m4a, .webm, .ogg, .flac · English & Hindi</div>
+                
+                <div class="audio-visualizer" id="audio-visualizer" style="display: none; margin-top: 1rem;">
+                    <canvas id="visualizer-canvas" width="400" height="40" style="width: 100%; border-radius: var(--radius-sm); background: rgba(0,0,0,0.02);"></canvas>
+                </div>
                 
                 <!-- Custom Audio Player (hidden until audio loaded) -->
-                <div id="audio-playback-container" style="display: none; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <div style="font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);"><span class="label-dot" style="background: #10b981;"></span>Audio Player</div>
+                <div id="audio-playback-container" style="display: none; margin-top: 1rem;">
                     <!-- Hidden native audio element (used as backend) -->
                     <audio id="audio-playback" preload="auto" style="display:none;"></audio>
                     <!-- Custom player UI -->
-                    <div class="custom-audio-player" id="custom-player">
-                        <div class="player-main-row">
-                            <button class="player-btn" id="player-play-btn" title="Play / Pause">
-                                <svg id="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
-                                <svg id="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                    <div class="custom-audio-player" id="custom-player" style="background: rgba(17,123,122,0.05); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <div class="player-main-row" style="display: flex; align-items: center; gap: 10px;">
+                            <button class="player-btn" id="player-play-btn" title="Play / Pause" style="background: white; border: 1px solid var(--border-color); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--accent-indigo);">
+                                <svg id="play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+                                <svg id="pause-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:none;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
                             </button>
-                            <div class="player-slider-wrapper">
-                                <input type="range" class="player-slider" id="player-slider" min="0" max="100" value="0" step="0.1">
-                                <span class="player-time" id="player-time">00:00 / 00:00</span>
+                            <div class="player-slider-wrapper" style="flex: 1; display: flex; align-items: center; gap: 10px;">
+                                <input type="range" class="player-slider" id="player-slider" min="0" max="100" value="0" step="0.1" style="flex: 1; accent-color: var(--accent-indigo);">
+                                <span class="player-time" id="player-time" style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-secondary);">00:00 / 00:00</span>
                             </div>
                         </div>
-                        <div class="player-volume-row">
-                            <button class="volume-btn" id="volume-btn" title="Mute / Unmute">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                            </button>
-                            <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" value="1" step="0.05">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unified Transcript View -->
+            <div class="card glass-card" id="transcript-card" style="margin-top: 1rem;">
+                <div class="card-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span><span class="label-dot" style="background: var(--accent-indigo);"></span>TRANSCRIPT (HINDI & ENGLISH)</span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="text" id="transcript-search" placeholder="Search English transcript..." style="padding: 0.4rem 0.8rem; font-size: 0.9rem; border: 1px solid var(--border-color); border-radius: 6px; width: 280px; box-shadow: var(--shadow-sm); padding-right: 80px;">
+                            <span id="search-count" style="display:none; font-size: 0.75rem; color: var(--text-muted); position: absolute; right: 10px; pointer-events: none;">0 matches</span>
                         </div>
+                        <button class="btn btn-ghost btn-sm" id="btn-download-gt" title="Download GT TSV" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">Download</button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Diarization Output Card -->
-            <div class="card glass-card diarization-card" id="diarization-card">
-                <div class="card-label">
-                    <div><span class="label-dot" style="background: #8b5cf6;"></span>Speaker Diarization Output</div>
-                    <div class="diarization-header-actions" style="display: flex; gap: 8px;">
-                        <button class="lang-toggle-btn" id="btn-lang-toggle" title="Toggle English/Original first">English ↔ Original</button>
-                        <button class="lang-toggle-btn" id="btn-download-gt" title="Download as GT TSV format" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);">Download GT</button>
+                <div class="diarization-timeline transcript-box" id="transcript-box" style="height: 400px; overflow-y: auto; padding: 1rem; background: #f9fdfc; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                    <div class="diarization-empty" id="transcript-empty" style="text-align: center; margin-top: 3rem; color: var(--text-muted);">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 0.5rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <div style="font-size: 0.85rem;">Transcript will appear here</div>
                     </div>
-                </div>
-                <div class="diarization-timeline" id="diarization-timeline">
-                    <div class="diarization-empty" id="diarization-empty">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                        <div>Upload or record audio to see speaker-diarized output</div>
-                        <div style="font-size: 0.75rem; margin-top: 4px; color: var(--text-muted);">Powered by Whisper + pyannote · runs on GPU</div>
-                    </div>
-                </div>
-                <div class="diarization-stats" id="diarization-stats" style="display:none;"></div>
-            </div>
-
-            <!-- Clinical Transcript (English) – for manual text input & NLP -->
-            <div class="card glass-card" id="transcript-card">
-                <div class="card-label"><span class="label-dot"></span>Clinical Transcript (English)</div>
-                <textarea id="transcript-area" class="transcript-textarea" placeholder="English transcript from diarization will appear here…&#10;&#10;Or type/paste clinical notes directly and click 'Extract Entities'." rows="6"></textarea>
-                <div class="transcript-actions">
-                    <button class="btn btn-primary" id="btn-extract" title="Extract clinical entities from text">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        Extract Entities
-                    </button>
-                    <button class="btn btn-ghost" id="btn-demo" title="Load a demo clinical transcript">
-                        Demo Note
-                    </button>
                 </div>
             </div>
 
@@ -161,6 +149,14 @@
                     <div class="info-item">
                         <span class="info-value" id="info-allergies">0</span>
                         <span class="info-label">Allergies</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-value" id="info-procedures">0</span>
+                        <span class="info-label">Procedures</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-value" id="info-reports">0</span>
+                        <span class="info-label">Reports</span>
                     </div>
                 </div>
             </div>
@@ -296,7 +292,37 @@
                 </div>
             </div>
 
-            <!-- Card 7: Treatment / Next Steps (CarePlan) -->
+            <!-- Card 7: Procedures -->
+            <div class="card glass-card form-card" id="card-procedures">
+                <div class="card-header">
+                    <div class="card-icon" style="--card-hue: 120;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <h3>Procedures</h3>
+                    <span class="card-badge">Procedure</span>
+                    <button class="btn-add" id="btn-add-procedure" title="Add procedure">+ Add</button>
+                </div>
+                <div class="repeater" id="repeater-procedures">
+                    <!-- Dynamic rows injected by JS -->
+                </div>
+            </div>
+
+            <!-- Card 8: Diagnostic Reports -->
+            <div class="card glass-card form-card" id="card-reports">
+                <div class="card-header">
+                    <div class="card-icon" style="--card-hue: 200;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                    </div>
+                    <h3>Diagnostic Reports</h3>
+                    <span class="card-badge">DiagnosticReport</span>
+                    <button class="btn-add" id="btn-add-report" title="Add report">+ Add</button>
+                </div>
+                <div class="repeater" id="repeater-reports">
+                    <!-- Dynamic rows injected by JS -->
+                </div>
+            </div>
+
+            <!-- Card 9: Treatment / Next Steps (CarePlan) -->
             <div class="card glass-card form-card" id="card-careplan">
                 <div class="card-header">
                     <div class="card-icon" style="--card-hue: 80;">
@@ -315,7 +341,7 @@
             <div class="form-actions" id="form-actions">
                 <button class="btn btn-primary btn-large" id="btn-generate-bundle">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,16 12,12 8,16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-                    Generate FHIR Bundle
+                    Submit
                 </button>
                 <button class="btn btn-ghost" id="btn-clear-form">Clear Form</button>
             </div>
@@ -323,26 +349,20 @@
     </main>
 
     <!-- ============================================================ -->
-    <!--  FHIR BUNDLE MODAL                                           -->
+    <!--  CONFIRMATION MODAL                                          -->
     <!-- ============================================================ -->
-    <div class="modal-overlay" id="modal-overlay" style="display:none;">
-        <div class="modal glass-card" id="bundle-modal">
-            <div class="modal-header">
-                <h2>FHIR Transaction Bundle</h2>
-                <div class="modal-actions">
-                    <button class="btn btn-ghost btn-sm" id="btn-copy-bundle" title="Copy JSON to clipboard">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                        Copy
-                    </button>
-                    <button class="btn btn-ghost btn-sm" id="btn-download-bundle" title="Download JSON file">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Download
-                    </button>
-                    <button class="btn-close" id="btn-close-modal" title="Close">✕</button>
+    <div class="modal-overlay" id="confirm-modal-overlay" style="display:none; z-index: 1000;">
+        <div class="modal glass-card" id="confirm-modal" style="max-width: 400px; text-align: center; margin: auto;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+                <h2>Confirm Submission</h2>
+            </div>
+            <div class="modal-body" style="padding: 1rem 1.5rem 2rem 1.5rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">Are you sure you want to submit this form? You cannot undo this action.</p>
+                <div class="modal-actions" style="justify-content: center; gap: 1rem;">
+                    <button class="btn btn-ghost" id="btn-cancel-submit">Cancel</button>
+                    <button class="btn btn-primary" id="btn-confirm-submit">Confirm</button>
                 </div>
             </div>
-            <div class="modal-stats" id="modal-stats"></div>
-            <pre class="json-viewer" id="json-viewer"><code id="json-content"></code></pre>
         </div>
     </div>
 
@@ -351,6 +371,6 @@
     <!-- ============================================================ -->
     <div class="toast-container" id="toast-container"></div>
 
-    <script src="/js/app.js"></script>
+    <script src="/js/app.js?v=6"></script>
 </body>
 </html>

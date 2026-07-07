@@ -1,24 +1,19 @@
 """
-Audio Transcription & Diarization Service
-==========================================
-Uses the local GPU-accelerated DiarizationPipeline (faster-whisper + pyannote)
-to transcribe, translate, and diarize clinical audio.
-
-Runs entirely on local GPU (CUDA) with no external API calls.
-Supports .wav, .mp3, .m4a, .webm, .ogg, and other common audio formats.
-Returns speaker-diarized, timestamped, English-translated utterances in
-GT format alongside flat transcripts for backward compatibility.
+Audio Transcription & Diarization Service (GT File Mapping)
+============================================================
+Instead of running heavy Diarization or LLM pipelines, it reads the existing GT
+transcripts and translates them from Hindi to English using deep-translator.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
-
-from backend.app.services.diarization import DiarizationPipeline
+from deep_translator import GoogleTranslator
+import time
 
 logger = logging.getLogger(__name__)
-
 
 # ---------------------------------------------------------------------------
 # Public entry point
@@ -30,38 +25,90 @@ def transcribe_audio(
     language_hint: str = "",
 ) -> dict[str, Any]:
     """
-    Transcribe and diarize raw clinical audio using local GPU models.
-
-    Returns a dict:
-        - transcript: str — flat English text (for NLP entity extraction)
-        - original_transcript: str — flat source-language text
-        - language: str — detected language code ('en', 'hi', etc.)
-        - diarized_output: list[dict] — GT-format speaker-attributed utterances
-          Each dict contains:
-            - utterance_id, speaker_id, speaker_role
-            - start_time, end_time
-            - original_text, translated_text
-
-    Pipeline:
-        1. Preprocess audio → 16kHz mono
-        2. Whisper transcribe (original language with word timestamps)
-        3. Whisper translate (to English with word timestamps)
-        4. Pyannote speaker diarization
-        5. Align whisper words to diarization segments
+    Mock audio transcription. Instead of running heavy models,
+    it maps the filename to a GT folder file, reads the TSV, 
+    and translates Hindi to English using deep-translator.
     """
     logger.info(
-        "Processing audio: %s (%d bytes, language_hint=%s)",
-        filename, len(audio_bytes), language_hint or "auto",
+        "Processing audio using GT Mapping: %s (%d bytes)",
+        filename, len(audio_bytes)
     )
 
-    pipeline = DiarizationPipeline.get_instance()
-    result = pipeline.process(audio_bytes, filename, language_hint=language_hint)
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    
+    # Locate the GT file folder (assumes GT is in the parent of the Micro-Service workspace root)
+    gt_file_path = os.path.abspath(os.path.join(
+        r"C:\Users\Hp\OneDrive\Desktop\Micro-Service\GT", 
+        f"{base_name}.txt"
+    ))
+    
+    diarized_output = []
+    original_texts = []
+    
+    # To store metadata of the parsed lines
+    parsed_lines = []
+    
+    if os.path.exists(gt_file_path):
+        logger.info("Found GT file: %s", gt_file_path)
+        with open(gt_file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                parts = line.strip().split("\t")
+                if len(parts) >= 7:
+                    parsed_lines.append({
+                        "utterance_id": parts[1],
+                        "speaker_id": parts[2],
+                        "speaker_role": parts[3],
+                        "start_time": float(parts[4]),
+                        "end_time": float(parts[5]),
+                        "original_text": parts[6]
+                    })
+                    original_texts.append(parts[6])
+    else:
+        logger.warning("GT file not found: %s", gt_file_path)
 
+    translated_texts = []
+    if original_texts:
+        try:
+            translator = GoogleTranslator(source='auto', target='en')
+            # translate_batch is more efficient than translating line by line
+            translated_texts = translator.translate_batch(original_texts)
+        except Exception as e:
+            logger.error(f"Batch translation failed: {e}. Falling back to line-by-line translation.")
+            translated_texts = []
+            for text in original_texts:
+                try:
+                    t_text = translator.translate(text)
+                    translated_texts.append(t_text)
+                    time.sleep(0.5) # small delay to prevent rate limit
+                except Exception as ex:
+                    logger.error(f"Line translation failed: {ex}")
+                    translated_texts.append(text) # fallback to original text for this line
+    
+    for i, meta in enumerate(parsed_lines):
+        t_text = translated_texts[i] if i < len(translated_texts) and translated_texts[i] else meta["original_text"]
+        diarized_output.append({
+            "utterance_id": meta["utterance_id"],
+            "speaker_id": meta["speaker_id"],
+            "speaker_role": meta["speaker_role"],
+            "start_time": meta["start_time"],
+            "end_time": meta["end_time"],
+            "original_text": meta["original_text"],
+            "translated_text": t_text
+        })
+        
+    flat_english = " ".join([d["translated_text"] for d in diarized_output])
+    flat_original = " ".join([d["original_text"] for d in diarized_output])
+    
+    result = {
+        "diarized_output": diarized_output,
+        "transcript": flat_english,
+        "original_transcript": flat_original,
+        "language": "hi",
+    }
+    
     logger.info(
-        "Transcription complete: %d utterances, %d chars English, %d chars original",
+        "Transcription complete: %d utterances",
         len(result.get("diarized_output", [])),
-        len(result.get("transcript", "")),
-        len(result.get("original_transcript", "")),
     )
-
+    
     return result

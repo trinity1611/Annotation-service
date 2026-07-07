@@ -9,7 +9,7 @@
     'use strict';
 
     // ── API Base ──────────────────────────────────────────────────────
-    const API = '';
+    const API = 'http://localhost:8000';
 
     // ── DOM References ────────────────────────────────────────────────
     const $ = (sel) => document.querySelector(sel);
@@ -21,17 +21,10 @@
     const audioUpload = $('#audio-upload');
     const recordingTimer = $('#recording-timer');
     const timerText = $('#timer-text');
-    const transcriptArea = $('#transcript-area');
-    const btnExtract = $('#btn-extract');
-    const btnDemo = $('#btn-demo');
+
     const btnGenerateBundle = $('#btn-generate-bundle');
     const btnClearForm = $('#btn-clear-form');
-    const modalOverlay = $('#modal-overlay');
-    const jsonContent = $('#json-content');
-    const modalStats = $('#modal-stats');
-    const btnCopyBundle = $('#btn-copy-bundle');
-    const btnDownloadBundle = $('#btn-download-bundle');
-    const btnCloseModal = $('#btn-close-modal');
+
     const visualizerCanvas = $('#visualizer-canvas');
     const toastContainer = $('#toast-container');
 
@@ -40,6 +33,8 @@
     const infoObservations = $('#info-observations');
     const infoMedications = $('#info-medications');
     const infoAllergies = $('#info-allergies');
+    const infoProcedures = $('#info-procedures');
+    const infoReports = $('#info-reports');
 
     // Custom player elements
     const audioPlayback = $('#audio-playback');
@@ -52,12 +47,11 @@
     const volumeBtn = $('#volume-btn');
     const volumeSlider = $('#volume-slider');
 
-    // Diarization elements
-    const diarizationTimeline = $('#diarization-timeline');
-    const diarizationEmpty = $('#diarization-empty');
-    const diarizationStats = $('#diarization-stats');
-    const btnLangToggle = $('#btn-lang-toggle');
+    // Transcript elements
+    const transcriptBox = $('#transcript-box');
+    const transcriptEmpty = $('#transcript-empty');
     const btnDownloadGT = $('#btn-download-gt');
+    const transcriptSearch = $('#transcript-search');
 
     // ── State ─────────────────────────────────────────────────────────
     let mediaRecorder = null;
@@ -68,7 +62,6 @@
     let currentBundle = null;
     let autocompleteTimeout = null;
     let currentUtterances = [];
-    let showEnglishFirst = true;
     let isSeeking = false;
 
     // ── Utilities ─────────────────────────────────────────────────────
@@ -108,6 +101,8 @@
         infoObservations.textContent = $$('#repeater-observations .repeater-row').length;
         infoMedications.textContent = $$('#repeater-medications .repeater-row').length;
         infoAllergies.textContent = $$('#repeater-allergies .repeater-row').length;
+        if (infoProcedures) infoProcedures.textContent = $$('#repeater-procedures .repeater-row').length;
+        if (infoReports) infoReports.textContent = $$('#repeater-reports .repeater-row').length;
     }
 
     // ── JSON Syntax Highlighting ──────────────────────────────────────
@@ -202,19 +197,23 @@
     });
 
     // Volume
-    volumeSlider.addEventListener('input', () => {
-        audioPlayback.volume = parseFloat(volumeSlider.value);
-    });
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', () => {
+            audioPlayback.volume = parseFloat(volumeSlider.value);
+        });
+    }
 
-    volumeBtn.addEventListener('click', () => {
-        if (audioPlayback.muted) {
-            audioPlayback.muted = false;
-            volumeSlider.value = audioPlayback.volume || 1;
-        } else {
-            audioPlayback.muted = true;
-            volumeSlider.value = 0;
-        }
-    });
+    if (volumeBtn) {
+        volumeBtn.addEventListener('click', () => {
+            if (audioPlayback.muted) {
+                audioPlayback.muted = false;
+                volumeSlider.value = audioPlayback.volume || 1;
+            } else {
+                audioPlayback.muted = true;
+                volumeSlider.value = 0;
+            }
+        });
+    }
 
     // ===================================================================
     //  DIARIZATION TIMELINE
@@ -224,37 +223,30 @@
         currentUtterances = utterances || [];
 
         if (!currentUtterances.length) {
-            diarizationTimeline.innerHTML = '';
-            diarizationTimeline.appendChild(diarizationEmpty);
-            diarizationEmpty.style.display = '';
-            diarizationStats.style.display = 'none';
+            transcriptBox.innerHTML = '';
+            transcriptBox.appendChild(transcriptEmpty);
+            transcriptEmpty.style.display = '';
             return;
         }
 
-        // Hide empty state
-        diarizationEmpty.style.display = 'none';
+        transcriptEmpty.style.display = 'none';
 
-        // Build unique speaker list for consistent color assignment
         const speakerIds = [];
         currentUtterances.forEach(u => {
             if (!speakerIds.includes(u.speaker_id)) speakerIds.push(u.speaker_id);
         });
 
-        // Clear timeline
-        diarizationTimeline.innerHTML = '';
+        transcriptBox.innerHTML = '';
 
-        // Render each utterance row
         currentUtterances.forEach((u, idx) => {
             const speakerColorIdx = speakerIds.indexOf(u.speaker_id) % 5;
+            
+            // Build Unified Row
             const row = document.createElement('div');
             row.className = 'utterance-row';
             row.dataset.index = idx;
             row.dataset.start = u.start_time;
             row.dataset.end = u.end_time;
-
-            const primaryText = showEnglishFirst ? u.translated_text : u.original_text;
-            const secondaryText = showEnglishFirst ? u.original_text : u.translated_text;
-
             row.innerHTML = `
                 <div class="utterance-speaker-bar speaker-bar-${speakerColorIdx}"></div>
                 <div class="utterance-content">
@@ -262,31 +254,20 @@
                         <span class="speaker-badge speaker-color-${speakerColorIdx}">${escapeHtml(u.speaker_role)}</span>
                         <span class="timestamp-badge">${formatTimestamp(u.start_time)} → ${formatTimestamp(u.end_time)}</span>
                     </div>
-                    <div class="utterance-text-primary">${escapeHtml(primaryText || '—')}</div>
-                    ${secondaryText ? `<div class="utterance-text-secondary">${escapeHtml(secondaryText)}</div>` : ''}
+                    <div class="utterance-text-primary" style="font-size:0.95rem; margin-bottom: 0.4rem;">
+                        <span style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; margin-right: 6px;">HI</span>
+                        ${escapeHtml(u.original_text || '—')}
+                    </div>
+                    <div class="utterance-text-secondary" style="font-size:0.95rem; color: var(--text-primary);">
+                        <span style="font-size: 0.7rem; color: var(--accent-indigo); text-transform: uppercase; font-weight: 600; margin-right: 6px;">EN</span>
+                        ${escapeHtml(u.translated_text || '—')}
+                    </div>
                 </div>
                 <span class="utterance-seek-icon">▶</span>
             `;
-
-            // Click to seek
-            row.addEventListener('click', () => {
-                seekToTime(u.start_time);
-            });
-
-            diarizationTimeline.appendChild(row);
+            row.addEventListener('click', () => seekToTime(u.start_time));
+            transcriptBox.appendChild(row);
         });
-
-        // Show stats
-        const totalDuration = currentUtterances.length > 0
-            ? currentUtterances[currentUtterances.length - 1].end_time
-            : 0;
-
-        diarizationStats.innerHTML = `
-            <span class="diarization-stat"><strong>${currentUtterances.length}</strong>utterances</span>
-            <span class="diarization-stat"><strong>${speakerIds.length}</strong>speakers</span>
-            <span class="diarization-stat"><strong>${formatTime(Math.floor(totalDuration))}</strong>duration</span>
-        `;
-        diarizationStats.style.display = 'flex';
     }
 
     function seekToTime(startTime) {
@@ -302,10 +283,10 @@
     }
 
     function updateActiveUtterance(currentTime) {
-        const rows = diarizationTimeline.querySelectorAll('.utterance-row');
+        const rows = transcriptBox.querySelectorAll('.utterance-row');
         let activeRow = null;
 
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const start = parseFloat(row.dataset.start);
             const end = parseFloat(row.dataset.end);
             if (currentTime >= start && currentTime <= end) {
@@ -316,29 +297,18 @@
             }
         });
 
-        // Auto-scroll to active row
+        // Auto-scroll logic
         if (activeRow) {
-            const container = diarizationTimeline;
-            const rowTop = activeRow.offsetTop - container.offsetTop;
+            const rowTop = activeRow.offsetTop - transcriptBox.offsetTop;
             const rowBottom = rowTop + activeRow.offsetHeight;
-            const scrollTop = container.scrollTop;
-            const containerHeight = container.clientHeight;
+            const scrollTop = transcriptBox.scrollTop;
+            const containerHeight = transcriptBox.clientHeight;
 
             if (rowTop < scrollTop || rowBottom > scrollTop + containerHeight) {
-                container.scrollTo({
-                    top: rowTop - containerHeight / 3,
-                    behavior: 'smooth',
-                });
+                transcriptBox.scrollTo({ top: rowTop - containerHeight / 3, behavior: 'smooth' });
             }
         }
     }
-
-    // Language toggle
-    btnLangToggle.addEventListener('click', () => {
-        showEnglishFirst = !showEnglishFirst;
-        btnLangToggle.textContent = showEnglishFirst ? 'English ↔ Original' : 'Original ↔ English';
-        renderDiarizedOutput(currentUtterances);
-    });
 
     // Download GT Format
     if (btnDownloadGT) {
@@ -369,6 +339,59 @@
             showToast('GT output downloaded!', 'success');
         });
     }
+
+    // Transcript Search
+    if (transcriptSearch) {
+        const searchCount = $('#search-count');
+        transcriptSearch.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const rows = transcriptBox.querySelectorAll('.utterance-row');
+            
+            let totalMatches = 0;
+            
+            rows.forEach(row => {
+                const enEl = row.querySelector('.utterance-text-secondary');
+                if (enEl) {
+                    if (!enEl.dataset.originalText) {
+                        enEl.dataset.originalText = enEl.innerHTML;
+                    }
+                    
+                    const plainText = enEl.textContent.toLowerCase();
+                    
+                    if (query && plainText.includes(query)) {
+                        row.style.display = '';
+                        
+                        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})`, 'gi');
+                        
+                        const matches = enEl.textContent.match(regex);
+                        if (matches) {
+                            totalMatches += matches.length;
+                        }
+                        
+                        const rawText = enEl.dataset.originalText;
+                        enEl.innerHTML = rawText.replace(regex, '<mark style="background-color: rgba(99, 102, 241, 0.2); color: var(--accent-indigo); border-radius: 2px; padding: 0 2px;">$1</mark>');
+                    } else {
+                        enEl.innerHTML = enEl.dataset.originalText || enEl.innerHTML;
+                        if (query) {
+                            row.style.display = 'none';
+                        } else {
+                            row.style.display = '';
+                        }
+                    }
+                }
+            });
+            
+            if (searchCount) {
+                if (query) {
+                    searchCount.style.display = 'inline-block';
+                    searchCount.textContent = `${totalMatches} match${totalMatches !== 1 ? 'es' : ''}`;
+                } else {
+                    searchCount.style.display = 'none';
+                }
+            }
+        });
+    }
+    // MedGemma extraction removed
 
     // ===================================================================
     //  AUDIO RECORDING
@@ -445,15 +468,13 @@
             // Init custom player
             initCustomPlayer(blob);
 
-            // Show processing state in diarization timeline
-            diarizationTimeline.innerHTML = `
+            // Show processing state in transcript box
+            transcriptBox.innerHTML = `
                 <div class="processing-overlay">
                     <div class="processing-spinner"></div>
-                    <div class="processing-text">Processing audio on GPU…</div>
-                    <div class="processing-subtext">Running Whisper transcription + pyannote diarization</div>
+                    <div class="processing-text">Translating and mapping...</div>
                 </div>
             `;
-            diarizationStats.style.display = 'none';
 
             const formData = new FormData();
             formData.append('file', blob, filename);
@@ -464,7 +485,7 @@
                 formData.append('language', langSelect.value);
             }
 
-            setStatus('Processing audio on GPU…', 'busy');
+            setStatus('Translating and mapping GT file…', 'busy');
 
             const resp = await fetch(`${API}/api/audio/transcribe`, {
                 method: 'POST',
@@ -489,8 +510,7 @@
                 renderDiarizedOutput([]);
             }
 
-            // Show English transcript in the text area (for NLP / manual editing)
-            transcriptArea.value = data.transcript;
+            // Transcript area removed
 
             // Update language badge
             const langBadge = document.getElementById('detected-language');
@@ -500,7 +520,6 @@
                 langBadge.style.display = 'inline-block';
             }
 
-            populateForm(data.extracted);
             setStatus('Ready');
             showToast('Diarization complete! Speaker segments extracted.', 'success');
         } catch (err) {
@@ -548,70 +567,7 @@
         draw();
     }
 
-    // ===================================================================
-    //  EXTRACT ENTITIES (Text)
-    // ===================================================================
 
-    btnExtract.addEventListener('click', async () => {
-        const text = transcriptArea.value.trim();
-        if (!text) {
-            showToast('Please enter or paste clinical notes first.', 'error');
-            return;
-        }
-
-        setStatus('Extracting entities…', 'busy');
-        try {
-            const resp = await fetch(`${API}/api/audio/transcribe-text`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text }),
-            });
-
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-            const data = await resp.json();
-            populateForm(data.extracted);
-            setStatus('Ready');
-            showToast('Entities extracted successfully!', 'success');
-        } catch (err) {
-            console.error('Extraction failed:', err);
-            setStatus('Error', 'error');
-            showToast('Extraction failed: ' + err.message, 'error');
-        }
-    });
-
-    // ── Demo Note ─────────────────────────────────────────────────────
-    btnDemo.addEventListener('click', async () => {
-        setStatus('Loading demo…', 'busy');
-        try {
-            const resp = await fetch(`${API}/api/audio/transcribe`, {
-                method: 'POST',
-                body: (() => {
-                    const fd = new FormData();
-                    fd.append('file', new Blob(['demo'], { type: 'audio/wav' }), 'demo.wav');
-                    return fd;
-                })(),
-            });
-
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-            const data = await resp.json();
-            transcriptArea.value = data.transcript;
-
-            // Render diarization if available
-            if (data.diarized_output && data.diarized_output.length > 0) {
-                renderDiarizedOutput(data.diarized_output);
-            }
-
-            populateForm(data.extracted);
-            setStatus('Ready');
-            showToast('Demo note loaded!', 'info');
-        } catch (err) {
-            console.error('Demo load failed:', err);
-            setStatus('Error', 'error');
-            showToast('Demo load failed: ' + err.message, 'error');
-        }
-    });
 
     // ===================================================================
     //  POPULATE FORM FROM EXTRACTED DATA
@@ -654,6 +610,20 @@
         const cpRepeater = $('#repeater-careplan');
         cpRepeater.innerHTML = '';
         (extracted.carePlan || []).forEach(cp => addCarePlanRow(cp.activity));
+
+        // Procedures
+        const procRepeater = $('#repeater-procedures');
+        if (procRepeater) {
+            procRepeater.innerHTML = '';
+            (extracted.procedures || []).forEach(p => addProcedureRow(p.name));
+        }
+
+        // Diagnostic Reports
+        const repRepeater = $('#repeater-reports');
+        if (repRepeater) {
+            repRepeater.innerHTML = '';
+            (extracted.reports || []).forEach(r => addDiagnosticReportRow(r.name));
+        }
 
         updateInfoCounters();
     }
@@ -929,6 +899,64 @@
         updateInfoCounters();
     }
 
+    // Procedure row
+    function addProcedureRow(name = '') {
+        const repeater = $('#repeater-procedures');
+        if (!repeater) return;
+        const row = document.createElement('div');
+        row.className = 'repeater-row';
+
+        const codeTag = document.createElement('span');
+        codeTag.className = 'code-tag';
+        codeTag.textContent = '—';
+
+        const fg = document.createElement('div');
+        fg.className = 'field-group';
+        const label = document.createElement('span');
+        label.className = 'field-label';
+        label.textContent = 'Procedure';
+        const { wrapper, input } = createAutocompleteInput('e.g., Appendectomy, MRI', 'Procedure', row, codeTag);
+        input.value = name;
+        fg.appendChild(label); fg.appendChild(wrapper);
+
+        row.appendChild(fg);
+        row.appendChild(codeTag);
+        row.appendChild(createRemoveBtn(row));
+        repeater.appendChild(row);
+
+        if (name) autoResolve(input, 'Procedure', codeTag);
+        updateInfoCounters();
+    }
+
+    // Diagnostic Report row
+    function addDiagnosticReportRow(name = '') {
+        const repeater = $('#repeater-reports');
+        if (!repeater) return;
+        const row = document.createElement('div');
+        row.className = 'repeater-row';
+
+        const codeTag = document.createElement('span');
+        codeTag.className = 'code-tag';
+        codeTag.textContent = '—';
+
+        const fg = document.createElement('div');
+        fg.className = 'field-group';
+        const label = document.createElement('span');
+        label.className = 'field-label';
+        label.textContent = 'Diagnostic Report';
+        const { wrapper, input } = createAutocompleteInput('e.g., Blood test report', 'DiagnosticReport', row, codeTag);
+        input.value = name;
+        fg.appendChild(label); fg.appendChild(wrapper);
+
+        row.appendChild(fg);
+        row.appendChild(codeTag);
+        row.appendChild(createRemoveBtn(row));
+        repeater.appendChild(row);
+
+        if (name) autoResolve(input, 'DiagnosticReport', codeTag);
+        updateInfoCounters();
+    }
+
     // Auto-resolve: fire a terminology search immediately for pre-filled values
     async function autoResolve(input, resourceType, codeTagEl) {
         const query = input.value.trim();
@@ -957,6 +985,8 @@
     $('#btn-add-allergy').addEventListener('click', () => addAllergyRow());
     $('#btn-add-medication').addEventListener('click', () => addMedicationRow());
     $('#btn-add-careplan').addEventListener('click', () => addCarePlanRow());
+    if ($('#btn-add-procedure')) $('#btn-add-procedure').addEventListener('click', () => addProcedureRow());
+    if ($('#btn-add-report')) $('#btn-add-report').addEventListener('click', () => addDiagnosticReportRow());
 
     // ── Encounter class autocomplete ──────────────────────────────────
     const encInput = $('#encounter-class');
@@ -1090,101 +1120,96 @@
             }
         });
 
-        return { demographics, encounter, conditions, observations, allergies, medications, carePlan };
+        // Procedures
+        const procedures = [];
+        $$('#repeater-procedures .repeater-row').forEach(row => {
+            const input = row.querySelector('.autocomplete-wrapper input');
+            if (input && input.value.trim()) {
+                procedures.push({
+                    name: input.value.trim(),
+                    code: input.dataset.code || '',
+                    system: input.dataset.system || '',
+                    display: input.dataset.display || input.value.trim(),
+                });
+            }
+        });
+
+        // Diagnostic Reports
+        const reports = [];
+        $$('#repeater-reports .repeater-row').forEach(row => {
+            const input = row.querySelector('.autocomplete-wrapper input');
+            if (input && input.value.trim()) {
+                reports.push({
+                    name: input.value.trim(),
+                    code: input.dataset.code || '',
+                    system: input.dataset.system || '',
+                    display: input.dataset.display || input.value.trim(),
+                });
+            }
+        });
+
+        return { demographics, encounter, conditions, observations, allergies, medications, procedures, reports, carePlan };
     }
 
     // ===================================================================
     //  GENERATE FHIR BUNDLE
     // ===================================================================
 
-    btnGenerateBundle.addEventListener('click', async () => {
-        const formData = collectFormData();
+    const confirmModalOverlay = $('#confirm-modal-overlay');
+    const btnCancelSubmit = $('#btn-cancel-submit');
+    const btnConfirmSubmit = $('#btn-confirm-submit');
+    
+    let pendingFormData = null;
 
-        if (!formData.demographics.name) {
-            showToast('Please enter patient name before generating bundle.', 'error');
+    btnGenerateBundle.addEventListener('click', () => {
+        pendingFormData = collectFormData();
+
+        if (!pendingFormData.demographics.name) {
+            showToast('Please enter patient name before submitting.', 'error');
             return;
         }
 
-        setStatus('Generating FHIR Bundle…', 'busy');
+        // Show confirmation modal
+        confirmModalOverlay.style.display = 'flex';
+    });
+
+    btnCancelSubmit.addEventListener('click', () => {
+        confirmModalOverlay.style.display = 'none';
+        pendingFormData = null;
+    });
+
+    btnConfirmSubmit.addEventListener('click', async () => {
+        confirmModalOverlay.style.display = 'none';
+        
+        if (!pendingFormData) return;
+        
+        setStatus('Submitting…', 'busy');
         btnGenerateBundle.disabled = true;
 
         try {
             const resp = await fetch(`${API}/api/fhir/bundle`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(pendingFormData),
             });
 
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-            const responseData = await resp.json();
-            currentBundle = responseData.bundle;
-            const savedPath = responseData.saved_path;
-            const patientId = responseData.patient_id;
-
-            // Stats
-            const entries = currentBundle.entry || [];
-            const resourceCounts = {};
-            entries.forEach(e => {
-                const rt = e.resource?.resourceType || 'Unknown';
-                resourceCounts[rt] = (resourceCounts[rt] || 0) + 1;
-            });
-
-            let statsHtml = Object.entries(resourceCounts).map(
-                ([k, v]) => `<span class="stat-chip"><strong>${v}</strong>${k}</span>`
-            ).join('');
-
-            // Show saved location info
-            if (savedPath) {
-                statsHtml += `<div class="save-info" style="margin-top: 8px; padding: 8px 12px; background: rgba(34,197,94,0.1); border-radius: 8px; font-size: 0.82rem; color: #22c55e; border: 1px solid rgba(34,197,94,0.2);">`;
-                statsHtml += `<strong>💾 Saved to:</strong> FHIR_gt/${escapeHtml(patientId)}/`;
-                statsHtml += `</div>`;
-            }
-
-            modalStats.innerHTML = statsHtml;
-
-            // Render JSON
-            jsonContent.innerHTML = highlightJSON(currentBundle);
-
-            // Show modal
-            modalOverlay.style.display = 'flex';
             setStatus('Ready');
-            showToast(`FHIR Bundle generated with ${entries.length} resources! Saved to FHIR_gt/`, 'success');
+            
+            // Show confirmation toast and then reload
+            showToast(`Submission successful! Redirecting...`, 'success');
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+            
         } catch (err) {
             console.error('Bundle generation failed:', err);
             setStatus('Error', 'error');
-            showToast('Bundle generation failed: ' + err.message, 'error');
-        } finally {
+            showToast('Submission failed: ' + err.message, 'error');
             btnGenerateBundle.disabled = false;
         }
-    });
-
-    // ===================================================================
-    //  MODAL CONTROLS
-    // ===================================================================
-
-    btnCloseModal.addEventListener('click', () => { modalOverlay.style.display = 'none'; });
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) modalOverlay.style.display = 'none';
-    });
-
-    btnCopyBundle.addEventListener('click', () => {
-        if (!currentBundle) return;
-        navigator.clipboard.writeText(JSON.stringify(currentBundle, null, 2))
-            .then(() => showToast('JSON copied to clipboard!', 'success'))
-            .catch(() => showToast('Copy failed', 'error'));
-    });
-
-    btnDownloadBundle.addEventListener('click', () => {
-        if (!currentBundle) return;
-        const blob = new Blob([JSON.stringify(currentBundle, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `fhir-bundle-${Date.now()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('JSON file downloaded!', 'success');
     });
 
     // ===================================================================
@@ -1199,9 +1224,9 @@
         $('#patient-phone').value = '';
         $('#encounter-class').value = '';
         $('#encounter-reason').value = '';
-        transcriptArea.value = '';
 
-        ['conditions', 'observations', 'allergies', 'medications', 'careplan'].forEach(id => {
+
+        ['conditions', 'observations', 'allergies', 'medications', 'procedures', 'reports', 'careplan'].forEach(id => {
             $(`#repeater-${id}`).innerHTML = '';
         });
 
@@ -1216,15 +1241,10 @@
         showToast('Form cleared.', 'info');
     });
 
-    // ── Keyboard shortcut: Escape closes modal ───────────────────────
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modalOverlay.style.display === 'flex') {
-            modalOverlay.style.display = 'none';
-        }
-    });
+
 
     // ── Initial state ─────────────────────────────────────────────────
     updateInfoCounters();
-    console.log('FHIRBridge Clinical Workspace initialized (GPU diarization mode).');
+    console.log('FHIRBridge Clinical Workspace initialized (GT mapping mode).');
 
 })();

@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.config import settings
-from backend.app.routes import audio, nlp, terminology, fhir
+from backend.app.routes import audio, terminology, fhir
 from backend.app.database import engine
 from backend.app import models
 
@@ -47,7 +47,6 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 
 app.include_router(audio.router)
-app.include_router(nlp.router)
 app.include_router(terminology.router)
 app.include_router(fhir.router)
 
